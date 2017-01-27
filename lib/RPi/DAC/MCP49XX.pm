@@ -30,7 +30,8 @@ The write register is the same for all devices under the MCP49xx umbrella, with
 the differing devices having differing sizes for the data portion. Following is
 a diagram that depicts the register for the different devices, where C<x> shows
 that the bit is available, with a C<-> signifying that this bit will be ignored.
-Note that a full 16-bits needs to be sent in regardless of chip type.
+Note that a full 16-bits needs to be sent in regardless of chip type. C<y>
+represent "don't care" bits.
 
             |<---------------- Write Command Register --------------->|
             |                   |                                     |
@@ -41,9 +42,9 @@ Note that a full 16-bits needs to be sent in regardless of chip type.
             | |     |    |    | |               |                     |
             |A/B | BUF|GAIN|SHDN|              DATA                   |
             |---------------------------------------------------------|
-    MCP4922 | x  |  x |  x |  x |  x  x  x  x  x  x  x  x  x  x  x  x | 12-bit
-    MCP4912 | x  |  x |  x |  x |  x  x  x  x  x  x  x  x  x  x  -  - | 10-bit
-    MCP4902 | x  |  x |  x |  x |  x  x  x  x  x  x  x  x  -  -  -  - |  8-bit
+    MCP4922 | x  |  y |  x |  x |  x  x  x  x  x  x  x  x  x  x  x  x | 12-bit
+    MCP4912 | x  |  y |  x |  x |  x  x  x  x  x  x  x  x  x  x  -  - | 10-bit
+    MCP4902 | x  |  y |  x |  x |  x  x  x  x  x  x  x  x  -  -  -  - |  8-bit
             -----------------------------------------------------------
 
 =head1 AUTHOR
