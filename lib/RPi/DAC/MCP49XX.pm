@@ -41,9 +41,9 @@ Note that a full 16-bits needs to be sent in regardless of chip type.
             | |     |    |    | |               |                     |
             |A/B | BUF|GAIN|SHDN|              DATA                   |
             |---------------------------------------------------------|
-    MCP4922 | x  |  x |  x |  x |  x  x  x  x  x  x  x  x  x  x  x  x |
-    MCP4912 | x  |  x |  x |  x |  x  x  x  x  x  x  x  x  x  x  -  - |
-    MCP4902 | x  |  x |  x |  x |  x  x  x  x  x  x  x  x  -  -  -  - |
+    MCP4922 | x  |  x |  x |  x |  x  x  x  x  x  x  x  x  x  x  x  x | 12-bit
+    MCP4912 | x  |  x |  x |  x |  x  x  x  x  x  x  x  x  x  x  -  - | 10-bit
+    MCP4902 | x  |  x |  x |  x |  x  x  x  x  x  x  x  x  -  -  -  - |  8-bit
             -----------------------------------------------------------
 
 =head1 AUTHOR
