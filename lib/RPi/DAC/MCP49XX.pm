@@ -22,6 +22,9 @@ converters (DAC) over the SPI bus
 
 =head1 METHODS
 
+=head1 TECHNICAL INFORMATION
+
+
 =head1 AUTHOR
 
 Steve Bertrand, C<< <steveb at cpan.org> >>
