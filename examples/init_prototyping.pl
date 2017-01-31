@@ -26,9 +26,8 @@ my $shdn_pin = $pi->pin(6);
 $cs_pin->mode(OUTPUT);
 $cs_pin->write(HIGH);
 
-# device 'shutdown' (SHDN) pin we'll tie to HIGH
-# as we're not devising API strategy for it yet.
-# when tied to HIGH, means all channels active(
+# device 'shutdown' (SHDN) pin we'll tie to HIGH,
+# when tied to HIGH, means all DACs active
 
 $shdn_pin->mode(OUTPUT);
 $shdn_pin->write(HIGH);
@@ -41,25 +40,29 @@ say $adc->percent(1);
 
 # dac 0
 
-dac_write(0, [0b1111, 0b11111111]);
-say $adc->percent(0);
+say "\nDAC 0...\n";
 
-dac_write(0, [0b0, 0b11111111]);
-say $adc->percent(0);
+dac_write(0, [0b1111, 0b11111111]);
+say "dacA: " . $adc->percent(0) . "%";
+
+dac_write(0, [0b0111, 0b0]);
+say "dacA: " . $adc->percent(0) . "%";
 
 dac_write(0, [0b0, 0b0]);
-say $adc->percent(0);
+say "dacA: " . $adc->percent(0) . "%";
 
 # dac 1
 
-dac_write(1, [0b1111, 0b11111111]);
-say $adc->percent(1);
+say "\nDAC 1...\n";
 
-dac_write(1, [0b0, 0b11111111]);
-say $adc->percent(1);
+dac_write(1, [0b1111, 0b11111111]);
+say "dacB: " . $adc->percent(1) . "%";
+
+dac_write(1, [0b0111, 0b0]);
+say "dacB: " . $adc->percent(1) . "%";
 
 dac_write(1, [0b0, 0b0]);
-say $adc->percent(1);
+say "dacB: " . $adc->percent(1) . "%";
 
 sub dac_write {
     my ($dac, $data) = @_;
@@ -68,42 +71,37 @@ sub dac_write {
 
     # init the register
 
-    my $register = [ 0, 0 ];
+    my $register = [0, 0];
 
     # DAC (bit 7) (a/b == 0/1) we're writing to
 
     $register->[0] = bit_set($register->[0], 7, 1, $dac);
-    say "dac: ".bit_bin($register->[0]);
 
     # BUFFERING (bit 6) == 0
 
     $register->[0] = bit_set($register->[0], 6, 1, 0);
-    say "buf: ".bit_bin($register->[0]);
 
     # GAIN (bit 5) == 1
 
     $register->[0] = bit_on($register->[0], 5);
-    say "shdn: ".bit_bin($register->[0]);
 
     # SHDN (shutdown) (bit 4) == 1
 
     $register->[0] = bit_set($register->[0], 4, 1, 1);
-    say "ga: ".bit_bin($register->[0]);
 
     # DATA (bits 3-0)
 
-    $register->[0] = bit_set($register->[0], 0, 4, ($data & (2**12-1)) >> 8);
-    say "d byte1: ".bit_bin($register->[0]);
+    $register->[0] = bit_set($register->[0], 0, 4, $data->[0]);
+    say "byte1: ".bit_bin($register->[0]);
 
     # DATA byte 2
 
-    $register->[1] = bit_set($register->[1], 0, 8, ($data & (2**8-1)));
-    say "d byte2: ".bit_bin($register->[1]);
+    $register->[1] = bit_set($register->[1], 0, 8, $data->[1]);
+    say "byte2: ".bit_bin($register->[1]);
 
     # drop chip select to LOW to start conversation with the DAC
 
     $cs_pin->write( LOW );
-    say $cs_pin->read;
 
     # write our bytes to the SPI bus
 

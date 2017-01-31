@@ -87,6 +87,14 @@ sub _cs {
 
     return $self->{cs};
 }
+sub _data_lsb {
+    # return the data LSB for a model of DAC
+
+    my $self = shift;
+    my $bits = $self->_model;
+
+    return 12 - $bits;
+}
 sub _gain {
     my ($self, $gain) = @_;
 
