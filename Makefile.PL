@@ -3,10 +3,10 @@ use warnings;
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
-    NAME             => 'RPi::DAC::MCP49XX',
+    NAME             => 'RPi::DAC::MCP4922',
     AUTHOR           => q{Steve Bertrand <steveb@cpan.org>},
-    VERSION_FROM     => 'lib/RPi/DAC/MCP49XX.pm',
-    ABSTRACT_FROM    => 'lib/RPi/DAC/MCP49XX.pm',
+    VERSION_FROM     => 'lib/RPi/DAC/MCP4922.pm',
+    ABSTRACT_FROM    => 'lib/RPi/DAC/MCP4922.pm',
     LICENSE          => 'perl_5',
     PL_FILES         => {},
     MIN_PERL_VERSION => 5.006,
@@ -14,12 +14,12 @@ WriteMakefile(
         'meta-spec' => { version => 2 },
         resources   => {
             bugtracker => {
-                web => 'https://github.com/stevieb9/rpi-dac-mcp49xx/issues',
+                web => 'https://github.com/stevieb9/rpi-dac-mcp4922/issues',
             },
             repository => {
                 type => 'git',
-                url => 'https://github.com/stevieb9/rpi-dac-mcp49xx.git',
-                web => 'https://github.com/stevieb9/rpi-dac-mcp49xx',
+                url => 'https://github.com/stevieb9/rpi-dac-mcp4922.git',
+                web => 'https://github.com/stevieb9/rpi-dac-mcp4922',
             },
         },
     },
@@ -34,5 +34,5 @@ WriteMakefile(
         #'Foo::Bar::Module' => 5.0401,
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
-    clean => { FILES => 'RPi-DAC-MCP49XX-*' },
+    clean => { FILES => 'RPi-DAC-MCP4922-*' },
 );
