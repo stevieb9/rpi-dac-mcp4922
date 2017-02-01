@@ -267,15 +267,86 @@ default of C<0> (unbuffered).
 
     gain => $int
 
-Optional: Integer. Sets the gain amplifier. C<1> for 1x gain (0v to 255/256 * Vref), and C<0> for 2x gain (0v to 255/256 * 2 * Vref). Defaults to C<1>, or 1x gain.
+Optional: Integer. Sets the gain amplifier. C<1> for 1x gain (0v to 255/256 *
+Vref), and C<0> for 2x gain (0v to 255/256 * 2 * Vref). Defaults to C<1>, or 1x
+gain.
 
-    shdn
+    shdn => $int
 
 Optional: Integer. This is the GPIO pin number if you decide to use the C<SHDN>
 (hardware shutdown pin #9) on the chip. Typically, this can simply be tied to
 3.3v or 5v which means the DACs will always be active. If you do use this pin,
 you *MUST* make a specific call to C<$dac->enable_hw()> before using either of
 the onboard DACs.
+
+=head2 set
+
+Writes a new analog output value to one of the onboard DACs.
+
+Parameters:
+
+    $dac
+
+Mandatory: Integer. C<0> for DAC A, or C<1> for DAC B.
+
+    $value
+
+Mandatory: Integer. The new value to write to the DAC. See L</DESCRIPTION> for
+the respective values for each IC model.
+
+=head2 disable_sw
+
+Disables a specified onboard DAC's output via software. Both DACs are enabled
+by default.
+
+Parameters:
+
+    $dac
+
+Mandatory: Integer. C<0> for DAC A, or C<1> for DAC B.
+
+=head2 enable_sw
+
+Re-enables a specified onboard DAC's output via software.
+
+Parameters:
+
+    $dac
+
+Mandatory: Integer. C<0> for DAC A, or C<1> for DAC B.
+
+=head2 enable_hw
+
+NOTE: The MCP49xx DAC IC chips have a C<SHDN> pin, which when pulled LOW,
+disables via hardware the output on both onboard DACs. Normally, this pin is
+simply tied to 3.3v+ or 5v+ which informs the hardware that both DACs will
+always be active.
+
+If you decide you want to tie the C<SHDN> pin to a GPIO pin and control this
+feature manually, you have to initialize your L<RPi::DAC::MCP4922> object by
+setting the C<shdn => $gpio_pin_num> in your call to C<new()>. Then, before
+either of the DACs can be used, this method (C<enable_hw()>) MUST be called.
+
+Takes no parameters.
+
+=head2 disable_hw
+
+Disables, via the hardware's C<SHDN> pin, the outputs of both onboard DACs.
+
+See L</enable_hw> for more information on this feature.
+
+Takes no parameters.
+
+=head2 register
+
+This is a helper function which allows you to view the configuration register at
+various stages of this software's operation. I tend to use it to ensure I'm
+getting proper bit strings back from the various inner operations:
+
+    printf("%b\n", $dac->register);
+
+Takes no parameters, returns the decimal value of the register as it's currently
+configured.
 
 =head1 TECHNICAL INFORMATION
 

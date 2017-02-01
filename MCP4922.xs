@@ -20,9 +20,9 @@ int _disable_hw (int shdn);
 int _disable_sw (int channel, int cs, int dac, int buf);
 int _enable_hw (int shdn);
 int _enable_sw (int channel, int cs, int dac, int buf);
-int __set_dac (int buf, int dac);
 void _set (int channel, int cs, int dac, int lsb, int buf, int data);
 int _write_dac (int channel, int cs, int buf);
+int __set_dac (int buf, int dac);
 
 int _reg_init (int buf, int gain){
 
@@ -60,7 +60,6 @@ int _enable_hw (int shdn){
     /* hardware un-shutdown of both DACs */
 
     digitalWrite(shdn, HIGH);
-
     return 0;
 }
 
@@ -81,6 +80,7 @@ int _disable_hw (int shdn){
     /* hardware shutdown of both DACs */
 
     digitalWrite(shdn, LOW);
+    return 0;
 }
 
 int _disable_sw (int channel, int cs, int dac, int buf){
