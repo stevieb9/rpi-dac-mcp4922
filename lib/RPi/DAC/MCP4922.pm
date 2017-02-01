@@ -49,7 +49,7 @@ sub disable_hard {
 sub disable_soft {
     my ($self, $dac) = @_;
     die "no DAC specified\n" if ! defined $dac;
-    _disable_soft($self->_channel, $self->_cs, $dac);
+    _disable_soft($self->_channel, $self->_cs, $dac, $self->register);
 }
 sub enable_hard {
     my ($self) = shift;
@@ -59,7 +59,7 @@ sub enable_hard {
 sub enable_soft {
     my ($self, $dac) = @_;
     die "no DAC specified\n" if ! defined $dac;
-    _enable_soft($self->_channel, $self->_cs, $dac);
+    _enable_soft($self->_channel, $self->_cs, $dac, $self->register);
 }
 sub register {
     my ($self, $buf) = @_;
