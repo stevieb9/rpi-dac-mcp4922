@@ -5,6 +5,9 @@ use warnings;
 
 our $VERSION = '0.01';
 
+use RPi::WiringPi::Constant qw(:all);
+use WiringPi::API qw(:all);
+
 require XSLoader;
 XSLoader::load('RPi::DAC::MCP4922', $VERSION);
 
@@ -27,10 +30,15 @@ sub new {
     $self->_model($args{model});
     $self->_shdn_pin($args{shdn});
 
+    wiringPiSetupGpio();
+    spi_setup($self->_channel);
+
+    pinMode($self->_cs, OUTPUT);
+    digitalWrite($self->_cs, HIGH);
+
     my $buf = _reg_init($self->_buf, $self->_gain);
     $self->register($buf);
 
-    printf("%b\n", $buf);
     return $self;
 }
 sub disable_hard {
@@ -71,8 +79,6 @@ sub set {
         $self->register,
         $value
     );
-    
-    printf("%b\n", $buf);
 }
 
 # private methods

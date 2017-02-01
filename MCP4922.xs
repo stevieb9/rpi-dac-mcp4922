@@ -47,15 +47,16 @@ int _set(int channel, int cs, int dac, int lsb, int buf, int data){
     int mask = ((int)pow(MULT, 12) -1) >> lsb;
 
     buf = (buf & ~(mask)) | (data << lsb);
+    
     unsigned char reg[2];
-
+    
     reg[0] = (buf >> 8) & 0xFF;
     reg[1] = buf & 0xFF;
 
     digitalWrite(cs, LOW);
     wiringPiSPIDataRW(channel, reg, 2);
     digitalWrite(cs, HIGH);
-    
+
     return buf;
 }
 
@@ -81,7 +82,7 @@ int __set_dac (int buf, int dac){
 
     /* set the DAC register bit */
 
-    if (buf)
+    if (dac)
         buf |= 1 << DAC_BIT;
     else
         buf &= ~(1 << DAC_BIT);
