@@ -36,30 +36,37 @@ sub new {
     pinMode($self->_cs, OUTPUT);
     digitalWrite($self->_cs, HIGH);
 
+    if (defined $self->_shdn_pin){
+        pinMode($self->_shdn_pin, OUTPUT);
+        digitalWrite($self->_shdn_pin, LOW);
+    }
+
     my $buf = _reg_init($self->_buf, $self->_gain);
+    
     $self->register($buf);
 
     return $self;
 }
-sub disable_hard {
+sub disable_hw {
     my ($self) = shift;
     die "no SHDN pin has been spedified\n" if ! defined $self->_shdn_pin;
-    _disable_hard($self->_channel, $self->_cs, $self->_shdn_pin);
+    _disable_hw($self->_shdn_pin);
 }
-sub disable_soft {
+sub disable_sw {
     my ($self, $dac) = @_;
     die "no DAC specified\n" if ! defined $dac;
-    _disable_soft($self->_channel, $self->_cs, $dac, $self->register);
+    _disable_sw($self->_channel, $self->_cs, $dac, $self->register);
+
 }
-sub enable_hard {
+sub enable_hw {
     my ($self) = shift;
     die "no SHDN pin has been spedified\n" if ! defined $self->_shdn_pin;
-    _enable_hard($self->_channel, $self->_cs, $self->_shdn_pin);
+    _enable_hw($self->_shdn_pin);
 }
-sub enable_soft {
+sub enable_sw {
     my ($self, $dac) = @_;
     die "no DAC specified\n" if ! defined $dac;
-    _enable_soft($self->_channel, $self->_cs, $dac, $self->register);
+    _enable_sw($self->_channel, $self->_cs, $dac, $self->register);
 }
 sub register {
     my ($self, $buf) = @_;
@@ -184,9 +191,91 @@ RPi::DAC::MCP4922 - Interface to the MCP49x2 series digital to analog converters
 Interface to the MCP49x2 series Digital to Analog Converters (DAC) over the SPI
 bus. These units have two onboard DACs, which are modified independently.
 
+The MCP4902 has 8-bit resolution (max 255 data value), the MCP4912 has 10-bit
+resolution (max val 1023), and the MCP4922 has 12-bit resolution (max val
+4095).
+
 =head1 SYNOPSIS
 
+    my $dac = RPi::DAC::MCP4922->new(
+
+        model   => 'MCP4922', # mandatory
+        channel => 0,         # mandatory (SPI channel)
+        cs      => 18,        # mandatory (GPIO pin num)
+        buf     => 0,         # optional, default
+        gain    => 1,         # optional, default
+    );
+
+    my ($dacA, $dacB) = (0, 1);
+
+    $dac->set($dacA, 4095); # 100% output
+    $dac->set($dacB, 0);    # 0% output
+
+    $dac->disable_sw($dacB); # shuts onboard DAC B down
+    $dac->enable_sw($dacB);  # turns it back on
+
+    # NOTE
+
+    # the SHDN pin on the IC is normally tied to 3.3v+ or 5v+ which
+    # signifies that the DACs are always available. This SHDN pin
+    # enables you to disable both DACs by pulling this pin LOW
+
+    # to enable this functionality, connect the ICs SHDN pin to a GPIO
+    # pin, then in the new() call, add the following param:
+
+    shdn => 19 # GPIO pin num
+
+    # if you do use this hardware feature, you MUST make a call to
+    # enable_hw() after initialization of the object before you can
+    # use either of the onboard DACs
+
+    my $dac->enable_hw();
+
+    ...
+
 =head1 METHODS
+
+=head2 new
+
+Instantiates a new L<RPi::DAC::MCP4922> object, sets up the GPIO and SPI, and
+returns the object.
+
+Parameters:
+
+All parameters are sent in as a hash.
+
+There are three mandatory parameters, the rest are optional with very sane
+defaults.
+
+    model => $str
+
+Mandatory: String. The model number of the MCP49xx DAC you're controlling.
+
+    channel => $int
+
+Mandatory: Integer. C<0> for SPI channel 0, or C<1> for SPI channel 1.
+
+    cs => $int
+
+Mandatory: Integer. The GPIO pin number connected to the DACs CS pin.
+
+    buf => $int
+
+Optional: Integer. C<0> for unbuffered output, and C<1> for buffered. This
+software does not at this time use the C<LDAC> latch pin, so leave this to the
+default of C<0> (unbuffered).
+
+    gain => $int
+
+Optional: Integer. Sets the gain amplifier. C<1> for 1x gain (0v to 255/256 * Vref), and C<0> for 2x gain (0v to 255/256 * 2 * Vref). Defaults to C<1>, or 1x gain.
+
+    shdn
+
+Optional: Integer. This is the GPIO pin number if you decide to use the C<SHDN>
+(hardware shutdown pin #9) on the chip. Typically, this can simply be tied to
+3.3v or 5v which means the DACs will always be active. If you do use this pin,
+you *MUST* make a specific call to C<$dac->enable_hw()> before using either of
+the onboard DACs.
 
 =head1 TECHNICAL INFORMATION
 
