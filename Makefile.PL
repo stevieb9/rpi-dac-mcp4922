@@ -9,6 +9,7 @@ WriteMakefile(
     ABSTRACT_FROM    => 'lib/RPi/DAC/MCP4922.pm',
     LICENSE          => 'perl_5',
     PL_FILES         => {},
+    LIBS             => ['-lwiringPi'],
     MIN_PERL_VERSION => 5.006,
     META_MERGE => {
         'meta-spec' => { version => 2 },

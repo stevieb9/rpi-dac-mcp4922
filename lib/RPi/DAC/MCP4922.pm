@@ -20,7 +20,6 @@ sub new {
     my ($class, %args) = @_;
 
     my $self = bless {}, $class;
-
     $self->_buf($args{buf});
     $self->_channel($args{channel});
     $self->_cs($args{cs});
@@ -28,27 +27,52 @@ sub new {
     $self->_model($args{model});
     $self->_shdn_pin($args{shdn});
 
-    $self->_init($self->_buf, $self->_gain);
+    my $buf = _reg_init($self->_buf, $self->_gain);
+    $self->register($buf);
+
+    printf("%b\n", $buf);
+    return $self;
 }
 sub disable_hard {
     my ($self) = shift;
     die "no SHDN pin has been spedified\n" if ! defined $self->_shdn_pin;
-    $self->_disable_hard($self->_channel, $self->_cs, $self->_shdn_pin);
+    _disable_hard($self->_channel, $self->_cs, $self->_shdn_pin);
 }
 sub disable_soft {
     my ($self, $dac) = @_;
     die "no DAC specified\n" if ! defined $dac;
-    $self->_disable_soft($self->_channel, $self->_cs, $dac);
+    _disable_soft($self->_channel, $self->_cs, $dac);
 }
 sub enable_hard {
     my ($self) = shift;
     die "no SHDN pin has been spedified\n" if ! defined $self->_shdn_pin;
-    $self->_enable_hard($self->_channel, $self->_cs, $self->_shdn_pin);
+    _enable_hard($self->_channel, $self->_cs, $self->_shdn_pin);
 }
 sub enable_soft {
     my ($self, $dac) = @_;
     die "no DAC specified\n" if ! defined $dac;
-    $self->_enable_soft($self->_channel, $self->_cs, $dac);
+    _enable_soft($self->_channel, $self->_cs, $dac);
+}
+sub register {
+    my ($self, $buf) = @_;
+    $self->{register} = $buf if defined $buf;
+    return $self->{register} || 0;
+}
+sub set {
+    #_set (channel, cs, dac, lsb, buf, data)
+
+    my ($self, $dac, $value) = @_;
+
+    my $buf =_set(
+        $self->_channel, 
+        $self->_cs, 
+        $dac, 
+        $self->_lsb, 
+        $self->register,
+        $value
+    );
+    
+    printf("%b\n", $buf);
 }
 
 # private methods
@@ -110,7 +134,7 @@ sub _gain {
 sub _model {
     my ($self, $model) = @_;
 
-    if (defined $model && $model =~ /\(d{4})$/){
+    if (defined $model && $model =~ /(\d{4})$/){
         my $model_num = $1;
 
         if (! exists $model_map->{$model_num}){
@@ -134,6 +158,10 @@ sub _shdn_pin {
     $self->{shdn} = $sd if defined $sd;
 
     return $self->{shdn};
+}
+sub _lsb {
+    my $self = shift;
+    return 12 - $self->{model};
 }
 sub _vim{};
 

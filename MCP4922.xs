@@ -34,6 +34,8 @@ int _reg_init (int buf, int gain){
         bits |= 1 << GAIN_BIT;
     }
 
+    bits |=1 << SHDN_BIT;
+
     return bits;
 }
 
@@ -87,7 +89,7 @@ int __set_dac (int buf, int dac){
     return buf;
 }
 
-MODULE = RPi::DAC::MCP4922  PACKAGE = main  
+MODULE = RPi::DAC::MCP4922  PACKAGE = RPi::DAC::MCP4922
 
 PROTOTYPES: DISABLE
 
