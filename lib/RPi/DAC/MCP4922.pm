@@ -229,7 +229,7 @@ resolution (max val 1023), and the MCP4922 has 12-bit resolution (max val
     # enable_hw() after initialization of the object before you can
     # use either of the onboard DACs
 
-    my $dac->enable_hw();
+    $dac->enable_hw;
 
     ...
 
@@ -242,10 +242,10 @@ returns the object.
 
 Parameters:
 
-All parameters are sent in as a hash.
+All parameters are sent in within a single hash.
 
 There are three mandatory parameters, the rest are optional with very sane
-defaults.
+defaults that shouldn't be used unless you understand the ramifications.
 
     model => $str
 
@@ -257,13 +257,15 @@ Mandatory: Integer. C<0> for SPI channel 0, or C<1> for SPI channel 1.
 
     cs => $int
 
-Mandatory: Integer. The GPIO pin number connected to the DACs CS pin.
+Mandatory: Integer. The GPIO pin number connected to the DACs chip select (CS)
+pin.
 
     buf => $int
 
 Optional: Integer. C<0> for unbuffered output, and C<1> for buffered. This
-software does not at this time use the C<LDAC> latch pin, so leave this to the
-default of C<0> (unbuffered).
+software does not at this time use the C<LDAC> latch pin (and should be tied to
+C<Gnd>), so although this param won't have any meaning, best to leave it set to
+the default, C<0>.
 
     gain => $int
 
@@ -350,14 +352,14 @@ configured.
 
 =head1 TECHNICAL INFORMATION
 
-=head1 DEVICE SPECIFICS
+=head2 DEVICE SPECIFICS
 
 The MCP49x2 series chips have two onboard DACs (referred to as DAC A and DAC B).
 
 The 4902 unit provides 8-bit output resolution (value 0-255), the 4912, 10-bit
 (0-1023), and the 4922, 12-bit (0-4095).
 
-=head1 DEVICE OPERATION
+=head2 DEVICE OPERATION
 
 The MCP49x2 series digital to analog converters (DAC) operate as follows:
 
@@ -461,6 +463,7 @@ These bits are used to set the output level.
     MCP4902 0-255   8
 
 The 10-bit and 8-bit models simply ignore the last 2 and 4 bits respectively.
+
 =head1 AUTHOR
 
 Steve Bertrand, C<< <steveb at cpan.org> >>

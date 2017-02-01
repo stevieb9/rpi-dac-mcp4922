@@ -31,8 +31,8 @@ WriteMakefile(
         'Test::More' => 0,
     },
     PREREQ_PM => {
-        #'ABC'              => 1.6,
-        #'Foo::Bar::Module' => 5.0401,
+        'RPi::WiringPi::Constant'   => 0.02,
+        'WiringPi::API'             => 2.36.4,
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'RPi-DAC-MCP4922-*' },

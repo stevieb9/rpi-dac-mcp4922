@@ -47,7 +47,7 @@ SYNOPSIS
         # enable_hw() after initialization of the object before you can
         # use either of the onboard DACs
     
-        my $dac->enable_hw();
+        $dac->enable_hw;
     
         ...
 
@@ -60,10 +60,11 @@ METHODS
 
     Parameters:
 
-    All parameters are sent in as a hash.
+    All parameters are sent in within a single hash.
 
     There are three mandatory parameters, the rest are optional with very
-    sane defaults.
+    sane defaults that shouldn't be used unless you understand the
+    ramifications.
 
         model => $str
 
@@ -76,13 +77,15 @@ METHODS
 
         cs => $int
 
-    Mandatory: Integer. The GPIO pin number connected to the DACs CS pin.
+    Mandatory: Integer. The GPIO pin number connected to the DACs chip
+    select (CS) pin.
 
         buf => $int
 
     Optional: Integer. 0 for unbuffered output, and 1 for buffered. This
-    software does not at this time use the LDAC latch pin, so leave this to
-    the default of 0 (unbuffered).
+    software does not at this time use the LDAC latch pin (and should be
+    tied to Gnd), so although this param won't have any meaning, best to
+    leave it set to the default, 0.
 
         gain => $int
 
