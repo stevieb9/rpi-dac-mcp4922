@@ -1,5 +1,12 @@
 Revision history for RPi-DAC-MCP4922
 
+0.02    2017-02-21
+        - renamed one of the datasheets (mcp48**.pdf to mcp48xx.pdf) due to
+          the package not being able to be unpackaged on Win32 platforms
+          (reported by Alexandr Ciornii) (closes #1)
+        - brought version up to par with the rest of the RPi modules that
+          require wiringPi C libs
+
 0.01    2017-02-01
         First version, released on an unsuspecting world.
 
