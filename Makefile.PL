@@ -32,7 +32,7 @@ WriteMakefile(
     },
     PREREQ_PM => {
         'RPi::WiringPi::Constant'   => 0.02,
-        'WiringPi::API'             => 2.36.6,
+        'WiringPi::API'             => 2.3608,
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'RPi-DAC-MCP4922-*' },

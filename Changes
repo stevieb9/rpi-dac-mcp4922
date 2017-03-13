@@ -1,5 +1,8 @@
 Revision history for RPi-DAC-MCP4922
 
+2.3604  2017-03-13
+        - changed versioning scheme from 2.36.x to 2.360x in module and prereqs
+
 2.36.3  2017-02-22
         - WiringPi::API prereq now v2.36.6, as that distribution was updated to
           correct a few build/installation issues
