@@ -1,5 +1,7 @@
 Revision history for RPi-DAC-MCP4922
 
+2.3606 UNREL
+
 2.3605 2017-06-28
         - bump prereq ver of WiringPi::API to 2.3612
         - bump prereq ver of RPi::WiringPi::Constant to 1.00
