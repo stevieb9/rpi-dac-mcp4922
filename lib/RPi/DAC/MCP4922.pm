@@ -5,7 +5,7 @@ use warnings;
 
 our $VERSION = '2.3606';
 
-use RPi::WiringPi::Constant qw(:all);
+use RPi::Const qw(:all);
 use WiringPi::API qw(:all);
 
 require XSLoader;
