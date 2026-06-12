@@ -3,7 +3,7 @@ package RPi::DAC::MCP4922;
 use strict;
 use warnings;
 
-our $VERSION = '3.1801';
+our $VERSION = '3.1802';
 
 use RPi::Const qw(:all);
 use WiringPi::API qw(:all);
