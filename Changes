@@ -1,6 +1,6 @@
 Revision history for RPi-DAC-MCP4922
 
-3.1801 UNREL
+3.1801    2026-06-12
         - Migrated constants from removed RPi::WiringPi::Constant to
           RPi::Const (incl. Makefile.PL prereq)
         - Bump prereq of WiringPi::API to 3.1801
