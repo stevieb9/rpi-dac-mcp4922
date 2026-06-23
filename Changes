@@ -1,7 +1,8 @@
 Revision history for RPi-DAC-MCP4922
 
 3.1802 UNREL
-    -
+    - Fixed inverted SHDN bit polarity in the SHUTDOWN BITS POD table (bit 12:
+      1 = Active, 0 = Shutdown, matching DS22250A Reg 5-1 and the XS)
 
 3.1801    2026-06-12
         - Migrated constants from removed RPi::WiringPi::Constant to

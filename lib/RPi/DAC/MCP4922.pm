@@ -446,8 +446,8 @@ Allows you to programmatically shut down both DACs on the chip.
      Param  Value   Result
      ----------------------
 
-     0      0b0     DACs active (default)
-     1      0b1     DACs shut down
+     0      0b0     DACs shut down
+     1      0b1     DACs active (default)
 
 =head3 DATA BITS
 
