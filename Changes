@@ -7,6 +7,23 @@ Revision history for RPi-DAC-MCP4922
       of the pure XS word-builders (_reg_init BUF/GAIN/SHDN bits; __set_dac
       DAC-select bit 15 set/clear/preserve), the model->bits->lsb chain, the
       accessor/constructor validation croaks, and the register() accessor
+    - Added ON THE WIRE and DATASHEET sections to TECHNICAL INFORMATION: the
+      16-bit write frame diagrammed byte-by-byte with worked set() and
+      disable_sw() examples, and a link to DS22250A
+    - Fixed SHUTDOWN BITS POD prose: the register bit shuts down only the DAC
+      selected by bit 15 (DS22250A Register 5-1), not both DACs; the hardware
+      SHDN pin is what affects both
+    - Bundled datasheet reference now points at docs/datasheet/mcp49xx.pdf
+      (already shipped) instead of the web URL in the DATASHEET POD
+    - Removed the unused docs/datasheet/mcp48xx.pdf (DS22244B, the MCP48xx
+      internal-Vref family this module doesn't drive) and its MANIFEST entry
+    - Added t/register.t to MANIFEST (was on disk but unlisted)
+    - Fixed _set()'s clear-mask (XS): it cleared 0xFFF >> lsb (the low bits)
+      rather than the full 12-bit data field, so stale bits in the top of the
+      field could survive on the 8/10-bit models; it now clears bits 11-0
+    - Dropped the dead "my $buf =" capture of the void _set() in set()
+    - Reworded register()'s POD: it returns the cached construction-time
+      register (BUF/GAIN/SHDN), not a live view of set() writes
 
 3.1801    2026-06-12
         - Migrated constants from removed RPi::WiringPi::Constant to

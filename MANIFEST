@@ -1,7 +1,6 @@
 Changes
 docs/breadboard/.placeholder
 docs/breadboard/dac_adc_bb.jpg
-docs/datasheet/mcp48xx.pdf
 docs/datasheet/mcp49xx.pdf
 docs/fritzing/.placeholder
 docs/fritzing/dac_adc.fzz
@@ -19,3 +18,4 @@ t/00-load.t
 t/manifest.t
 t/pod-coverage.t
 t/pod.t
+t/register.t

@@ -78,7 +78,7 @@ sub set {
 
     my ($self, $dac, $value) = @_;
 
-    my $buf =_set(
+    _set(
         $self->_channel, 
         $self->_cs, 
         $dac, 
@@ -341,14 +341,15 @@ Takes no parameters.
 
 =head2 register
 
-This is a helper function which allows you to view the configuration register at
-various stages of this software's operation. I tend to use it to ensure I'm
-getting proper bit strings back from the various inner operations:
+Returns the decimal value of the 16-bit configuration register as computed at
+construction: the C<BUF>, C<GAIN> and C<SHDN> control bits derived from the
+C<new()> arguments. This is a cached base value; it does B<not> reflect
+subsequent C<set()> data writes or C<enable_sw()>/C<disable_sw()> calls, which
+are shifted straight out to the chip and not stored:
 
     printf("%b\n", $dac->register);
 
-Takes no parameters, returns the decimal value of the register as it's currently
-configured.
+Takes no parameters; returns the register's decimal value.
 
 =head1 TECHNICAL INFORMATION
 
@@ -441,13 +442,17 @@ Specifies the value of the gain amplifier.
 
     bit 12
 
-Allows you to programmatically shut down both DACs on the chip.
+Allows you to programmatically shut down the DAC selected by bit 15 (per
+DS22250A, this register bit shuts down only the addressed channel - it is
+the hardware C<SHDN> I<pin> that affects both DACs at once; see
+L</enable_hw>). A shut-down channel's C<Vout> pin presents typically
+500k ohm to ground.
 
      Param  Value   Result
      ----------------------
 
-     0      0b0     DACs shut down
-     1      0b1     DACs active (default)
+     0      0b0     Selected DAC shut down
+     1      0b1     Selected DAC active (default)
 
 =head3 DATA BITS
 
@@ -463,6 +468,67 @@ These bits are used to set the output level.
     MCP4902 0-255   8
 
 The 10-bit and 8-bit models simply ignore the last 2 and 4 bits respectively.
+
+=head2 ON THE WIRE
+
+Every public operation - L</set>, L</enable_sw> and L</disable_sw> - is
+exactly one 16-bit SPI frame, built in the XS and pushed out with
+C<wiringPiSPIDataRW()> on C</dev/spidev0.0> or C<.1> at 1MHz (the
+L<WiringPi::API> C<spi_setup()> default), SPI mode 0,0. The chip has no
+data-out pin - the bus is one-way, and nothing comes back.
+
+Framing is done by the GPIO pin you handed C<new()> as C<cs>, not by the
+Pi's hardware CE pin (which still toggles alongside the frame, so don't
+hang another device off it). The chip latches SDI bits on rising SCK
+edges, and executes the write when CS returns HIGH after the 16th bit -
+with C<LDAC> tied to ground as this module expects, the analog output
+steps at that CS rising edge.
+
+C<< $dac->set(0, 4095) >> on an MCP4922 (default C<gain>) drives DAC A
+to full scale. The two bytes on the wire are C<0x3F 0xFF>:
+
+    CS (GPIO)  \_________________________________/  <- output latches
+                    +-----------+-----------+
+    SDI (MOSI)      | 0011 1111 | 1111 1111 |
+                    +-----------+-----------+
+
+    0x3FFF:
+    +-----+-----+-----+------+---------------------+
+    | A/B | BUF | GA  | SHDN | D11 ............ D0 |
+    |  0  |  0  |  1  |  1   |  1111 1111 1111     |
+    +-----+-----+-----+------+---------------------+
+     bit15  14    13    12     11                 0
+
+    A/B  = 0   DAC A
+    BUF  = 0   Vref unbuffered
+    GA   = 1   1x gain
+    SHDN = 1   Selected DAC active
+    Data = 4095, full scale out of Vref * 1
+
+On the smaller models the XS shifts the value into the high end of the
+data field exactly as the L</DEVICE REGISTER> diagram shows - left by 2
+for the 10-bit MCP4912, by 4 for the 8-bit MCP4902 - so the ignored low
+bits ride along as zeros.
+
+A software shutdown is the same frame shape with the data bits left
+alone. C<< $dac->disable_sw(1) >> clears C<SHDN> with C<A/B> set - bytes
+C<0xA0 0x00>:
+
+    +-----+-----+-----+------+---------------------+
+    | A/B | BUF | GA  | SHDN | D11 ............ D0 |
+    |  1  |  0  |  1  |  0   |  0000 0000 0000     |
+    +-----+-----+-----+------+---------------------+
+
+C<enable_sw(1)> is identical with C<SHDN> back to C<1> (bytes C<0xB0
+0x00>). The hardware path (L</enable_hw>/L</disable_hw>) never touches
+the bus at all - it just drives the C<SHDN> I<pin>.
+
+=head2 DATASHEET
+
+The Microchip MCP4902/4912/4922 datasheet (DS22250A) is distributed with
+this software as F<docs/datasheet/mcp49xx.pdf>. It covers the write command
+register, the timing diagrams, and the electrical characteristics for all
+three models this module drives.
 
 =head1 AUTHOR
 

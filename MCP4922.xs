@@ -48,7 +48,9 @@ void _set(int channel, int cs, int dac, int lsb, int buf, int data){
     /* prepares the register for sending to a DAC */
 
     buf = __set_dac(buf, dac);
-    int mask = ((int)pow(MULT, 12) -1) >> lsb;
+    /* Clear the entire 12-bit data field (bits 11-0) before OR-ing in the
+       new value; data is left-aligned via data << lsb on the 8/10-bit parts */
+    int mask = (int)pow(MULT, 12) - 1;
 
     buf = (buf & ~(mask)) | (data << lsb);
    
