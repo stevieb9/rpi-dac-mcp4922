@@ -7,11 +7,11 @@ use RPi::DAC::MCP4922;
 
 my $mod = 'RPi::DAC::MCP4922';
 
-# All HW-free: the pure XS word-builders (_reg_init/__set_dac) return the
-# assembled register word, and every accessor/constructor validation dies
-# before any wiringPi call - so nothing here touches a Pi or the SPI bus.
-# (The core _set word assembly writes-and-returns-void, so it can't be unit
-# tested without a refactor to a pure builder - tracked as B1 in the plan.)
+# All HW-free: the pure XS word-builders (_reg_init/__set_dac/__build_word)
+# return the assembled register word, and every accessor/constructor validation
+# dies before any wiringPi call - so nothing here touches a Pi or the SPI bus.
+# __build_word() is the word assembly split out of _set() (B19) so the 12-bit
+# field-clear (the B9 mask fix) is unit-testable without an 8/10-bit part.
 
 # --- _reg_init(buf, gain): BUF(14) | GAIN(13) | SHDN(12, always on) ---
 
@@ -26,6 +26,34 @@ is RPi::DAC::MCP4922::__set_dac(0x0000, 0), 0x0000, "__set_dac: DAC A leaves bit
 is RPi::DAC::MCP4922::__set_dac(0x0000, 1), 0x8000, "__set_dac: DAC B sets bit 15";
 is RPi::DAC::MCP4922::__set_dac(0x7000, 1), 0xF000, "__set_dac: DAC B preserves the control bits";
 is RPi::DAC::MCP4922::__set_dac(0x8000, 0), 0x0000, "__set_dac: DAC A clears bit 15";
+
+# --- __build_word(buf, dac, lsb, data): the pure word assembly split out of
+#     _set() (B19). Sets the DAC-select bit, clears the ENTIRE 12-bit data
+#     field, then ORs in data << lsb. This is where the B9 mask bug lived:
+#     without an 8/10-bit MCP4902/4912 on the bench, these cases exercise it. ---
+
+my $bw = \&RPi::DAC::MCP4922::__build_word;
+
+# DAC-select bit + control-nibble preservation
+is $bw->(0x7000, 0, 0, 0xABC), 0x7ABC, "__build_word: DAC A preserves control nibble";
+is $bw->(0x7000, 1, 0, 0xABC), 0xFABC, "__build_word: DAC B sets bit 15, keeps control bits";
+
+# 12-bit part (lsb 0): data written straight into the field
+is $bw->(0x7000, 0, 0, 0xFFF), 0x7FFF, "12-bit: full-scale data";
+is $bw->(0x7FFF, 0, 0, 0x000), 0x7000, "12-bit: stale full field cleared to zero";
+
+# 10-bit part (lsb 2): data left-aligned into bits 11-2
+is $bw->(0x7000, 0, 2, 1023), 0x7FFC, "10-bit: full-scale (1023 << 2)";
+is $bw->(0x7000, 0, 2, 512),  0x7800, "10-bit: mid-scale (512 << 2)";
+# B9 REGRESSION GUARD: a stale cached word must have its WHOLE field cleared.
+# The old mask (0xFFF >> 2 = 0x3FF) left bits 11-10 set -> 0x7C00, not 0x7000.
+is $bw->(0x7FFF, 0, 2, 0), 0x7000, "10-bit: stale top-of-field bits cleared (B9)";
+
+# 8-bit part (lsb 4): data left-aligned into bits 11-4
+is $bw->(0x7000, 0, 4, 255), 0x7FF0, "8-bit: full-scale (255 << 4)";
+is $bw->(0x7ABC, 0, 4, 0x0A), 0x70A0, "8-bit: stale field replaced (0x0A << 4)";
+# B9 REGRESSION GUARD: old mask (0xFFF >> 4 = 0xFF) left bits 11-8 set -> 0x7F00.
+is $bw->(0x7FFF, 0, 4, 0), 0x7000, "8-bit: stale top-of-field bits cleared (B9)";
 
 # --- model -> bits -> lsb chain ---
 

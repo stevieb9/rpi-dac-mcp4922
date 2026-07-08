@@ -23,6 +23,7 @@ int _enable_sw (int channel, int cs, int dac, int buf);
 void _set (int channel, int cs, int dac, int lsb, int buf, int data);
 int _write_dac (int channel, int cs, int buf);
 int __set_dac (int buf, int dac);
+int __build_word (int buf, int dac, int lsb, int data);
 
 int _reg_init (int buf, int gain){
 
@@ -44,17 +45,28 @@ int _reg_init (int buf, int gain){
 }
 
 void _set(int channel, int cs, int dac, int lsb, int buf, int data){
-    
-    /* prepares the register for sending to a DAC */
+
+    /* prepares the register and sends it to a DAC */
+
+    buf = __build_word(buf, dac, lsb, data);
+
+    _write_dac(channel, cs, buf);
+}
+
+int __build_word (int buf, int dac, int lsb, int data){
+
+    /* Pure register-word assembly, split out of _set() so the field-clear math
+       is unit-testable without hardware (the B9 mask bug lived here). Sets the
+       DAC-select bit, clears the ENTIRE 12-bit data field (bits 11-0), then
+       OR-s in the sample, left-aligned via data << lsb on the 8/10-bit parts. */
 
     buf = __set_dac(buf, dac);
-    /* Clear the entire 12-bit data field (bits 11-0) before OR-ing in the
-       new value; data is left-aligned via data << lsb on the 8/10-bit parts */
+
     int mask = (int)pow(MULT, 12) - 1;
 
     buf = (buf & ~(mask)) | (data << lsb);
-   
-    _write_dac(channel, cs, buf);
+
+    return buf;
 }
 
 int _enable_hw (int shdn){
@@ -168,6 +180,13 @@ int
 __set_dac (buf, dac)
 	int	buf
 	int	dac
+
+int
+__build_word (buf, dac, lsb, data)
+	int	buf
+	int	dac
+	int	lsb
+	int	data
 
 void 
 _write_dac (channel, cs, buf)

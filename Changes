@@ -24,6 +24,10 @@ Revision history for RPi-DAC-MCP4922
     - Dropped the dead "my $buf =" capture of the void _set() in set()
     - Reworded register()'s POD: it returns the cached construction-time
       register (BUF/GAIN/SHDN), not a live view of set() writes
+    - Split the register-word assembly out of _set() (XS) into a pure
+      __build_word() helper, and covered it in t/register.t across the
+      8/10/12-bit lsb values (incl. stale-cache cases) so the clear-mask fix
+      is verified without an 8/10-bit MCP4902/4912 part
 
 3.1801    2026-06-12
         - Migrated constants from removed RPi::WiringPi::Constant to
