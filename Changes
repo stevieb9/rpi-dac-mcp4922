@@ -28,6 +28,11 @@ Revision history for RPi-DAC-MCP4922
       __build_word() helper, and covered it in t/register.t across the
       8/10/12-bit lsb values (incl. stale-cache cases) so the clear-mask fix
       is verified without an 8/10-bit MCP4902/4912 part
+    - Added a Makefile.PL build guard: the family-canonical
+      RPi::Const::BuildCheck::wiringpi_build_check() (via CONFIGURE_REQUIRES),
+      so a missing or too-old wiringPi now exits NA rather than FAIL on CPAN
+      testers; this XS dist previously had no such guard. Bumped the RPi::Const
+      prereq to 1.07
 
 3.1801    2026-06-12
         - Migrated constants from removed RPi::WiringPi::Constant to
